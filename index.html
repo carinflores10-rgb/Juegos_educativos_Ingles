@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrera Prehispánica</title>
+    <style>
+        :root {
+            --bg-color: #f4e8c1;
+            --primary: #8b4513;
+            --secondary: #d35400;
+            --accent: #27ae60;
+            --text-dark: #2c3e50;
+            --text-light: #ecf0f1;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-image: radial-gradient(#d35400 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        h1, h2 {
+            color: var(--primary);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            max-width: 800px;
+            width: 100%;
+            border: 4px solid var(--primary);
+        }
+
+        /* Pantalla de Inicio */
+        #setup-screen {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid var(--secondary);
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: var(--secondary);
+            color: var(--text-light);
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #a04000;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        #player-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        #player-list li {
+            background: var(--primary);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        /* Pantalla de Juego */
+        #game-screen {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .board {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #e8dcc5;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid var(--primary);
+        }
+
+        .track {
+            display: flex;
+            align-items: center;
+            background: white;
+            height: 50px;
+            border-radius: 25px;
+            position: relative;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.1);
+            border: 2px solid #ccc;
+        }
+
+        .track-label {
+            width: 120px;
+            padding-left: 15px;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        .finish-line {
+            position: absolute;
+            right: 20px;
+            font-weight: bold;
+            color: #7f8c8d;
+            z-index: 1;
+        }
+
+        .avatar {
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 120px; /* Offset initial */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            transition: left 0.5s ease-out;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            z-index: 3;
+        }
+
+        .turn-indicator {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+            padding: 10px;
+            background: var(--bg-color);
+            border-radius: 8px;
+            border: 2px dashed var(--secondary);
+        }
+
+        /* Modal Preguntas */
+        #question-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            border: 5px solid var(--secondary);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            background: #34495e;
+            padding: 15px;
+            font-size: 16px;
+        }
+
+        .option-btn:hover {
+            background: #2c3e50;
+        }
+
+        /* Pantalla Final */
+        #end-screen {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .winner-text {
+            font-size: 40px;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .options-grid { grid-template-columns: 1fr; }
+            .track-label { width: 80px; font-size: 12px; }
+            .avatar { left: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PANTALLA DE INICIO -->
+    <div class="container" id="setup-screen">
+        <h1>Carrera Prehispánica</h1>
+        <p>Añade a los jugadores. El primero en alcanzar 100 puntos (5 pts por respuesta correcta) gana.</p>
+        <div class="input-group">
+            <input type="text" id="player-name" placeholder="Nombre del jugador" autocomplete="off">
+            <button onclick="addPlayer()">Añadir</button>
+        </div>
+        <ul id="player-list"></ul>
+        <button id="start-btn" style="display: none; background: var(--accent);" onclick="startGame()">Comenzar Juego</button>
+    </div>
+
+    <!-- PANTALLA DE JUEGO -->
+    <div class="container" id="game-screen">
+        <h2>Tablero de Posiciones</h2>
+        <div class="board" id="board"></div>
+        <div class="turn-indicator" id="turn-indicator"></div>
+        <button onclick="drawQuestion()" style="width: 100%; font-size: 18px; padding: 15px;">Sacar Pregunta</button>
+    </div>
+
+    <!-- MODAL DE PREGUNTA -->
+    <div id="question-modal">
+        <div class="modal-content">
+            <h3 id="question-text"></h3>
+            <div class="options-grid" id="options-container"></div>
+        </div>
+    </div>
+
+    <!-- PANTALLA FINAL -->
+    <div class="container" id="end-screen">
+        <h2>¡Juego Terminado!</h2>
+        <div class="winner-text" id="winner-text"></div>
+        <button onclick="location.reload()">Jugar de Nuevo</button>
+    </div>
+
+    <script>
+        const PUNTOS_POR_ACIERTO = 5;
+        const PUNTOS_PARA_GANAR = 100;
+        const COLORES = ['#e74c3c', '#3498db', '#2ecc71', '#9b59b6', '#f1c40f', '#e67e22'];
+
+        let players = [];
+        let currentPlayerIndex = 0;
+        let currentQuestion = null;
+
+        // Banco de preguntas riguroso
+        const bancoPreguntas = [
+            { q: "¿Cuál fue la capital del Imperio Inca?", options: ["Cusco", "Lima", "Quito", "Tiwanaku"], a: 0 },
+            { q: "¿Qué sistema de nudos usaban los incas para llevar registros contables?", options: ["Quipu", "Chasqui", "Tocapu", "Mita"], a: 0 },
+            { q: "¿Qué cultura mesoamericana construyó la ciudad de Tenochtitlán?", options: ["Azteca (Mexica)", "Maya", "Olmeca", "Tolteca"], a: 0 },
+            { q: "¿Qué deidad mesoamericana es conocida como la 'Serpiente Emplumada'?", options: ["Quetzalcóatl", "Huitzilopochtli", "Tláloc", "Inti"], a: 0 },
+            { q: "¿Cuál de estas culturas es famosa por sus cabezas colosales esculpidas en piedra?", options: ["Olmeca", "Zapoteca", "Maya", "Moche"], a: 0 },
+            { q: "¿Qué cultura se desarrolló en el entorno del Lago Titicaca y construyó la Puerta del Sol?", options: ["Tiwanaku", "Inca", "Wari", "Chavín"], a: 0 },
+            { q: "¿Qué civilización mesoamericana inventó el concepto del número cero de forma independiente?", options: ["Maya", "Azteca", "Inca", "Mixteca"], a: 0 },
+            { q: "¿Qué nombre recibían los mensajeros que recorrían el sistema de caminos inca (Qhapaq Ñan)?", options: ["Chasquis", "Curacas", "Amautas", "Mitimaes"], a: 0 },
+            { q: "¿En qué lago fue construida la capital del Imperio Azteca?", options: ["Texcoco", "Titicaca", "Pátzcuaro", "Chapala"], a: 0 },
+            { q: "¿Qué emperador inca fue capturado por Francisco Pizarro en Cajamarca?", options: ["Atahualpa", "Huáscar", "Pachacútec", "Túpac Amaru"], a: 0 },
+            { q: "¿Cuál era el dios principal y patrón de la guerra en la mitología mexica (azteca)?", options: ["Huitzilopochtli", "Tláloc", "Kukulcán", "Viracocha"], a: 0 },
+            { q: "¿Qué sistema de cultivo flotante utilizaban los aztecas?", options: ["Chinampas", "Terrazas", "Camellones", "Milpas"], a: 0 },
+            { q: "¿Qué texto sagrado recoge la mitología y la historia de la creación del pueblo Maya K'iche'?", options: ["Popol Vuh", "Chilam Balam", "Códice Dresde", "Comentarios Reales"], a: 0 },
+            { q: "¿Cuál es el sitio arqueológico maya más famoso por la pirámide de El Castillo?", options: ["Chichén Itzá", "Palenque", "Tikal", "Copán"], a: 0 },
+            { q: "¿Qué cultura preincaica peruana trazó enormes geoglifos en el desierto?", options: ["Nazca", "Moche", "Paracas", "Chavín"], a: 0 },
+            { q: "¿Cuál era el idioma principal del Imperio Inca?", options: ["Quechua", "Aymara", "Náhuatl", "Mapudungun"], a: 0 },
+            { q: "¿Qué metal era considerado 'el sudor del sol' por los incas y usado solo para la élite?", options: ["Oro", "Plata", "Cobre", "Bronce"], a: 0 },
+            { q: "¿Qué cultura precolombina de la costa norte de Perú construyó la Huaca del Sol y de la Luna?", options: ["Moche", "Chimú", "Nazca", "Inca"], a: 0 },
+            { q: "¿Cuál era la deidad suprema creadora en la mitología inca y de las culturas andinas centrales?", options: ["Viracocha", "Inti", "Pachamama", "Supay"], a: 0 },
+            { q: "¿Qué conquistador español lideró la caída del Imperio Azteca?", options: ["Hernán Cortés", "Francisco Pizarro", "Pedro de Valdivia", "Diego de Almagro"], a: 0 },
+            { q: "¿Qué nombre recibía el emperador o gobernante máximo del Imperio Inca?", options: ["Sapa Inca", "Tlatoani", "Halach Uinic", "Cacique"], a: 0 },
+            { q: "¿Cómo se denomina el sistema andino de trabajo recíproco o tributo en forma de labor?", options: ["Mita", "Ayni", "Mingaco", "Tributo"], a: 0 },
+            { q: "¿Qué ciudad fue apodada por los historiadores como la 'Roma de América' por su poderío militar (Mesoamérica)?", options: ["Tenochtitlán", "Teotihuacán", "Tula", "Cusco"], a: 0 },
+            { q: "¿Qué civilización construyó la 'Ciudad de los Dioses', Teotihuacán?", options: ["Se desconoce su origen exacto", "Aztecas", "Toltecas", "Mayas"], a: 0 },
+            { q: "¿Qué material de origen volcánico era indispensable para las herramientas de corte y armas en Mesoamérica?", options: ["Obsidiana", "Pedernal", "Bronce", "Hierro"], a: 0 },
+            { q: "¿A qué cultura pertenece el sitio arqueológico de San Lorenzo y La Venta?", options: ["Olmeca", "Zapoteca", "Totonaca", "Huasteca"], a: 0 },
+            { q: "¿Qué animal era el símbolo terrenal del poder en casi todas las culturas mesoamericanas?", options: ["El jaguar", "El cóndor", "El puma", "La serpiente"], a: 0 },
+            { q: "¿Qué bebida, preparada a base de cacao, era consumida por la nobleza azteca y maya?", options: ["Xocolatl", "Pulque", "Balché", "Chicha"], a: 0 },
+            { q: "¿Qué cultura andina es famosa por sus trepanaciones craneales y finos textiles funerarios?", options: ["Paracas", "Nazca", "Chavín", "Wari"], a: 0 },
+            { q: "¿Cuál era el título del gobernante máximo de una ciudad-estado mexica?", options: ["Huey Tlatoani", "Sapa Inca", "Curaca", "Ahau"], a: 0 }
+        ];
+
+        let preguntasDisponibles = [];
+
+        function mezclarArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function recargarPreguntas() {
+            preguntasDisponibles = JSON.parse(JSON.stringify(bancoPreguntas));
+            mezclarArray(preguntasDisponibles);
+        }
+
+        function addPlayer() {
+            const input = document.getElementById('player-name');
+            const name = input.value.trim();
+            if (name && players.length < 6) {
+                players.push({
+                    name: name,
+                    score: 0,
+                    color: COLORES[players.length % COLORES.length]
+                });
+                
+                const li = document.createElement('li');
+                li.style.backgroundColor = players[players.length-1].color;
+                li.textContent = name;
+                document.getElementById('player-list').appendChild(li);
+                
+                input.value = '';
+                
+                if (players.length >= 2) {
+                    document.getElementById('start-btn').style.display = 'block';
+                }
+            }
+        }
+
+        document.getElementById('player-name').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addPlayer();
+        });
+
+        function startGame() {
+            if (players.length < 2) return;
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            recargarPreguntas();
+            renderBoard();
+            updateTurnIndicator();
+        }
+
+        function renderBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            
+            const isMobile = window.innerWidth <= 600;
+            const offset = isMobile ? 80 : 120; // Espacio del nombre
+            
+            players.forEach((p, index) => {
+                const track = document.createElement('div');
+                track.className = 'track';
+                
+                const label = document.createElement('div');
+                label.className = 'track-label';
+                label.textContent = p.name;
+                
+                const finish = document.createElement('div');
+                finish.className = 'finish-line';
+                finish.textContent = PUNTOS_PARA_GANAR;
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'avatar';
+                avatar.style.backgroundColor = p.color;
+                avatar.textContent = p.score;
+                avatar.id = 'avatar-' + index;
+                
+                // Calcular posición inicial
+                avatar.style.left = `calc(${offset}px + calc(calc(100% - ${offset + 40}px) * ${p.score / PUNTOS_PARA_GANAR}))`;
+                
+                track.appendChild(label);
+                track.appendChild(finish);
+                track.appendChild(avatar);
+                board.appendChild(track);
+            });
+        }
+
+        function updateTurnIndicator() {
+            const indicator = document.getElementById('turn-indicator');
+            const currentPlayer = players[currentPlayerIndex];
+            indicator.innerHTML = `Turno de: <span style="color:${currentPlayer.color}">${currentPlayer.name}</span>`;
+        }
+
+        function drawQuestion() {
+            if (preguntasDisponibles.length === 0) {
+                recargarPreguntas();
+            }
+
+            const rawQ = preguntasDisponibles.pop();
+            
+            // Barajar opciones y registrar dónde queda la correcta
+            const opcionesBarajadas = rawQ.options.map((opt, i) => ({ text: opt, isCorrect: i === rawQ.a }));
+            mezclarArray(opcionesBarajadas);
+            
+            currentQuestion = {
+                q: rawQ.q,
+                options: opcionesBarajadas
+            };
+
+            document.getElementById('question-text').textContent = currentQuestion.q;
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            currentQuestion.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt.text;
+                btn.onclick = () => checkAnswer(opt.isCorrect, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('question-modal').style.display = 'flex';
+        }
+
+        function checkAnswer(isCorrect, btn) {
+            const options = document.querySelectorAll('.option-btn');
+            options.forEach(b => b.disabled = true); // Bloquear botones
+            
+            if (isCorrect) {
+                btn.style.backgroundColor = '#27ae60'; // Verde
+                players[currentPlayerIndex].score += PUNTOS_POR_ACIERTO;
+                if (players[currentPlayerIndex].score > PUNTOS_PARA_GANAR) {
+                    players[currentPlayerIndex].score = PUNTOS_PARA_GANAR;
+                }
+            } else {
+                btn.style.backgroundColor = '#c0392b'; // Rojo
+                // Resaltar la correcta
+                options.forEach((b, idx) => {
+                    if (currentQuestion.options[idx].isCorrect) {
+                        b.style.backgroundColor = '#27ae60';
+                    }
+                });
+            }
+
+            updateBoardVisuals();
+
+            setTimeout(() => {
+                document.getElementById('question-modal').style.display = 'none';
+                
+                if (players[currentPlayerIndex].score >= PUNTOS_PARA_GANAR) {
+                    showEndScreen();
+                } else {
+                    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+                    updateTurnIndicator();
+                }
+            }, 1500);
+        }
+
+        function updateBoardVisuals() {
+            const isMobile = window.innerWidth <= 600;
+            const offset = isMobile ? 80 : 120;
+            
+            const p = players[currentPlayerIndex];
+            const avatar = document.getElementById('avatar-' + currentPlayerIndex);
+            
+            avatar.textContent = p.score;
+            avatar.style.left = `calc(${offset}px + calc(calc(100% - ${offset + 40}px) * ${p.score / PUNTOS_PARA_GANAR}))`;
+        }
+
+        function showEndScreen() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'block';
+            document.getElementById('winner-text').textContent = `¡Felicidades, ${players[currentPlayerIndex].name}! Has dominado la historia prehispánica.`;
+        }
+
+        // Manejar redimensionamiento para actualizar posiciones
+        window.addEventListener('resize', () => {
+            if (document.getElementById('game-screen').style.display === 'flex') {
+                players.forEach((p, index) => {
+                    const isMobile = window.innerWidth <= 600;
+                    const offset = isMobile ? 80 : 120;
+                    const avatar = document.getElementById('avatar-' + index);
+                    avatar.style.left = `calc(${offset}px + calc(calc(100% - ${offset + 40}px) * ${p.score / PUNTOS_PARA_GANAR}))`;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
