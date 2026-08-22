@@ -3,502 +3,448 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrera Prehispánica</title>
+    <title>Furniture Race - English Game</title>
     <style>
         :root {
-            --bg-color: #f4e8c1;
-            --primary: #8b4513;
-            --secondary: #d35400;
-            --accent: #27ae60;
-            --text-dark: #2c3e50;
-            --text-light: #ecf0f1;
-        }
-
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --bg: #f8f9fa;
+            --text: #2b2d42;
+            --player1: #ff006e;
+            --player2: #fb5607;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-dark);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             margin: 0;
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
-            background-image: radial-gradient(#d35400 1px, transparent 1px);
-            background-size: 20px 20px;
         }
 
-        h1, h2 {
-            color: var(--primary);
-            text-align: center;
+        h1 {
+            color: var(--secondary);
             text-transform: uppercase;
             letter-spacing: 2px;
+            margin-bottom: 5px;
         }
 
-        .container {
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 900px;
             background: white;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-            max-width: 800px;
-            width: 100%;
-            border: 4px solid var(--primary);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            text-align: center;
         }
 
-        /* Pantalla de Inicio */
-        #setup-screen {
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Setup Screen */
+        .input-group {
+            margin: 20px 0;
             display: flex;
             flex-direction: column;
             gap: 15px;
+            align-items: center;
         }
 
-        .input-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        input[type="text"] {
-            flex: 1;
+        input {
             padding: 12px;
-            border: 2px solid var(--secondary);
-            border-radius: 6px;
             font-size: 16px;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            width: 80%;
+            max-width: 300px;
         }
 
         button {
-            background-color: var(--secondary);
-            color: var(--text-light);
+            background-color: var(--primary);
+            color: white;
             border: none;
-            padding: 12px 20px;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
+            padding: 12px 24px;
+            font-size: 18px;
             font-weight: bold;
-            transition: background 0.3s, transform 0.1s;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
         }
 
         button:hover {
-            background-color: #a04000;
+            transform: scale(1.05);
+            background-color: var(--secondary);
         }
 
-        button:active {
-            transform: scale(0.98);
-        }
-
-        #player-list {
-            list-style: none;
-            padding: 0;
+        /* Game Screen */
+        .status-bar {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        #player-list li {
-            background: var(--primary);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
-
-        /* Pantalla de Juego */
-        #game-screen {
-            display: none;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .board {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            background: #e8dcc5;
-            padding: 20px;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 15px;
+            background: #eee;
             border-radius: 8px;
-            border: 2px solid var(--primary);
-        }
-
-        .track {
-            display: flex;
-            align-items: center;
-            background: white;
-            height: 50px;
-            border-radius: 25px;
-            position: relative;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.1);
-            border: 2px solid #ccc;
-        }
-
-        .track-label {
-            width: 120px;
-            padding-left: 15px;
-            font-weight: bold;
-            z-index: 2;
-        }
-
-        .finish-line {
-            position: absolute;
-            right: 20px;
-            font-weight: bold;
-            color: #7f8c8d;
-            z-index: 1;
-        }
-
-        .avatar {
-            height: 40px;
-            width: 40px;
-            border-radius: 50%;
-            position: absolute;
-            top: 3px;
-            left: 120px; /* Offset initial */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 12px;
-            transition: left 0.5s ease-out;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-            z-index: 3;
         }
 
         .turn-indicator {
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            margin: 10px 0;
-            padding: 10px;
-            background: var(--bg-color);
-            border-radius: 8px;
-            border: 2px dashed var(--secondary);
+            color: var(--warning);
+            font-size: 24px;
+            margin-bottom: 20px;
+            animation: pulse 1.5s infinite;
         }
 
-        /* Modal Preguntas */
-        #question-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
-        .modal-content {
-            background: white;
-            padding: 30px;
+        /* The Board */
+        .board {
+            margin-bottom: 30px;
+            background: #e9ecef;
+            padding: 15px;
             border-radius: 10px;
-            max-width: 600px;
-            width: 90%;
-            text-align: center;
-            border: 5px solid var(--secondary);
+        }
+
+        .track {
+            display: grid;
+            grid-template-columns: repeat(21, 1fr);
+            gap: 2px;
+            margin: 10px 0;
+            background: #ccc;
+            border: 2px solid #aaa;
+            position: relative;
+        }
+
+        .cell {
+            height: 40px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #ccc;
+        }
+
+        .cell:last-child {
+            background: #ffd166;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .player-token {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            position: absolute;
+            top: 7px;
+            transition: left 0.5s ease-in-out;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+
+        #token-1 { background-color: var(--player1); }
+        #token-2 { background-color: var(--player2); }
+
+        .track-label {
+            text-align: left;
+            font-weight: bold;
+            margin-bottom: -5px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        #label-p1 { color: var(--player1); }
+        #label-p2 { color: var(--player2); }
+
+        /* Question Area */
+        .question-card {
+            background: var(--success);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-top: 20px;
         }
 
         .option-btn {
-            background: #34495e;
+            background: white;
+            color: var(--text);
+            border: 2px solid var(--success);
+            font-size: 18px;
             padding: 15px;
-            font-size: 16px;
         }
 
         .option-btn:hover {
-            background: #2c3e50;
+            background: var(--success);
+            color: white;
         }
 
-        /* Pantalla Final */
-        #end-screen {
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
-
+        /* End Screen */
         .winner-text {
             font-size: 40px;
-            color: var(--accent);
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 600px) {
-            .options-grid { grid-template-columns: 1fr; }
-            .track-label { width: 80px; font-size: 12px; }
-            .avatar { left: 80px; }
+            color: var(--warning);
+            margin: 20px 0;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA DE INICIO -->
-    <div class="container" id="setup-screen">
-        <h1>Carrera Prehispánica</h1>
-        <p>Añade a los jugadores. El primero en alcanzar 100 puntos (5 pts por respuesta correcta) gana.</p>
+    <!-- Start Screen -->
+    <div id="setup-screen" class="screen active">
+        <h1>Furniture Race</h1>
+        <p>Alcanza los 100 puntos (5 pts por respuesta correcta) para ganar.</p>
         <div class="input-group">
-            <input type="text" id="player-name" placeholder="Nombre del jugador" autocomplete="off">
-            <button onclick="addPlayer()">Añadir</button>
-        </div>
-        <ul id="player-list"></ul>
-        <button id="start-btn" style="display: none; background: var(--accent);" onclick="startGame()">Comenzar Juego</button>
-    </div>
-
-    <!-- PANTALLA DE JUEGO -->
-    <div class="container" id="game-screen">
-        <h2>Tablero de Posiciones</h2>
-        <div class="board" id="board"></div>
-        <div class="turn-indicator" id="turn-indicator"></div>
-        <button onclick="drawQuestion()" style="width: 100%; font-size: 18px; padding: 15px;">Sacar Pregunta</button>
-    </div>
-
-    <!-- MODAL DE PREGUNTA -->
-    <div id="question-modal">
-        <div class="modal-content">
-            <h3 id="question-text"></h3>
-            <div class="options-grid" id="options-container"></div>
+            <input type="text" id="p1-name" placeholder="Nombre Jugador 1" required autocomplete="off">
+            <input type="text" id="p2-name" placeholder="Nombre Jugador 2" required autocomplete="off">
+            <button onclick="initGame()">Comenzar Carrera</button>
         </div>
     </div>
 
-    <!-- PANTALLA FINAL -->
-    <div class="container" id="end-screen">
-        <h2>¡Juego Terminado!</h2>
-        <div class="winner-text" id="winner-text"></div>
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+        <div class="status-bar">
+            <span id="score-p1">Jugador 1: 0 pts</span>
+            <span id="score-p2">Jugador 2: 0 pts</span>
+        </div>
+
+        <div class="turn-indicator" id="turn-display">Turno de: -</div>
+
+        <div class="board" id="board-container">
+            <div class="track-label" id="label-p1">Pista J1</div>
+            <div class="track" id="track-1">
+                <div class="player-token" id="token-1"></div>
+            </div>
+
+            <div class="track-label" id="label-p2">Pista J2</div>
+            <div class="track" id="track-2">
+                <div class="player-token" id="token-2"></div>
+            </div>
+        </div>
+
+        <div class="question-card" id="question-text">Preparando pregunta...</div>
+        <div class="options-grid" id="options-container">
+            <!-- Botones inyectados vía JS -->
+        </div>
+    </div>
+
+    <!-- End Screen -->
+    <div id="end-screen" class="screen">
+        <h1>¡Carrera Terminada!</h1>
+        <div class="winner-text" id="winner-announcement">Ganador: -</div>
         <button onclick="location.reload()">Jugar de Nuevo</button>
     </div>
 
     <script>
-        const PUNTOS_POR_ACIERTO = 5;
-        const PUNTOS_PARA_GANAR = 100;
-        const COLORES = ['#e74c3c', '#3498db', '#2ecc71', '#9b59b6', '#f1c40f', '#e67e22'];
+        // Lógica de datos y estado
+        const POINTS_PER_QUESTION = 5;
+        const POINTS_TO_WIN = 100;
+        const TOTAL_STEPS = POINTS_TO_WIN / POINTS_PER_QUESTION; // 20 casillas
 
-        let players = [];
+        let players = [
+            { name: '', score: 0, position: 0 },
+            { name: '', score: 0, position: 0 }
+        ];
         let currentPlayerIndex = 0;
-        let currentQuestion = null;
-
-        // Banco de preguntas riguroso
-        const bancoPreguntas = [
-            { q: "¿Cuál fue la capital del Imperio Inca?", options: ["Cusco", "Lima", "Quito", "Tiwanaku"], a: 0 },
-            { q: "¿Qué sistema de nudos usaban los incas para llevar registros contables?", options: ["Quipu", "Chasqui", "Tocapu", "Mita"], a: 0 },
-            { q: "¿Qué cultura mesoamericana construyó la ciudad de Tenochtitlán?", options: ["Azteca (Mexica)", "Maya", "Olmeca", "Tolteca"], a: 0 },
-            { q: "¿Qué deidad mesoamericana es conocida como la 'Serpiente Emplumada'?", options: ["Quetzalcóatl", "Huitzilopochtli", "Tláloc", "Inti"], a: 0 },
-            { q: "¿Cuál de estas culturas es famosa por sus cabezas colosales esculpidas en piedra?", options: ["Olmeca", "Zapoteca", "Maya", "Moche"], a: 0 },
-            { q: "¿Qué cultura se desarrolló en el entorno del Lago Titicaca y construyó la Puerta del Sol?", options: ["Tiwanaku", "Inca", "Wari", "Chavín"], a: 0 },
-            { q: "¿Qué civilización mesoamericana inventó el concepto del número cero de forma independiente?", options: ["Maya", "Azteca", "Inca", "Mixteca"], a: 0 },
-            { q: "¿Qué nombre recibían los mensajeros que recorrían el sistema de caminos inca (Qhapaq Ñan)?", options: ["Chasquis", "Curacas", "Amautas", "Mitimaes"], a: 0 },
-            { q: "¿En qué lago fue construida la capital del Imperio Azteca?", options: ["Texcoco", "Titicaca", "Pátzcuaro", "Chapala"], a: 0 },
-            { q: "¿Qué emperador inca fue capturado por Francisco Pizarro en Cajamarca?", options: ["Atahualpa", "Huáscar", "Pachacútec", "Túpac Amaru"], a: 0 },
-            { q: "¿Cuál era el dios principal y patrón de la guerra en la mitología mexica (azteca)?", options: ["Huitzilopochtli", "Tláloc", "Kukulcán", "Viracocha"], a: 0 },
-            { q: "¿Qué sistema de cultivo flotante utilizaban los aztecas?", options: ["Chinampas", "Terrazas", "Camellones", "Milpas"], a: 0 },
-            { q: "¿Qué texto sagrado recoge la mitología y la historia de la creación del pueblo Maya K'iche'?", options: ["Popol Vuh", "Chilam Balam", "Códice Dresde", "Comentarios Reales"], a: 0 },
-            { q: "¿Cuál es el sitio arqueológico maya más famoso por la pirámide de El Castillo?", options: ["Chichén Itzá", "Palenque", "Tikal", "Copán"], a: 0 },
-            { q: "¿Qué cultura preincaica peruana trazó enormes geoglifos en el desierto?", options: ["Nazca", "Moche", "Paracas", "Chavín"], a: 0 },
-            { q: "¿Cuál era el idioma principal del Imperio Inca?", options: ["Quechua", "Aymara", "Náhuatl", "Mapudungun"], a: 0 },
-            { q: "¿Qué metal era considerado 'el sudor del sol' por los incas y usado solo para la élite?", options: ["Oro", "Plata", "Cobre", "Bronce"], a: 0 },
-            { q: "¿Qué cultura precolombina de la costa norte de Perú construyó la Huaca del Sol y de la Luna?", options: ["Moche", "Chimú", "Nazca", "Inca"], a: 0 },
-            { q: "¿Cuál era la deidad suprema creadora en la mitología inca y de las culturas andinas centrales?", options: ["Viracocha", "Inti", "Pachamama", "Supay"], a: 0 },
-            { q: "¿Qué conquistador español lideró la caída del Imperio Azteca?", options: ["Hernán Cortés", "Francisco Pizarro", "Pedro de Valdivia", "Diego de Almagro"], a: 0 },
-            { q: "¿Qué nombre recibía el emperador o gobernante máximo del Imperio Inca?", options: ["Sapa Inca", "Tlatoani", "Halach Uinic", "Cacique"], a: 0 },
-            { q: "¿Cómo se denomina el sistema andino de trabajo recíproco o tributo en forma de labor?", options: ["Mita", "Ayni", "Mingaco", "Tributo"], a: 0 },
-            { q: "¿Qué ciudad fue apodada por los historiadores como la 'Roma de América' por su poderío militar (Mesoamérica)?", options: ["Tenochtitlán", "Teotihuacán", "Tula", "Cusco"], a: 0 },
-            { q: "¿Qué civilización construyó la 'Ciudad de los Dioses', Teotihuacán?", options: ["Se desconoce su origen exacto", "Aztecas", "Toltecas", "Mayas"], a: 0 },
-            { q: "¿Qué material de origen volcánico era indispensable para las herramientas de corte y armas en Mesoamérica?", options: ["Obsidiana", "Pedernal", "Bronce", "Hierro"], a: 0 },
-            { q: "¿A qué cultura pertenece el sitio arqueológico de San Lorenzo y La Venta?", options: ["Olmeca", "Zapoteca", "Totonaca", "Huasteca"], a: 0 },
-            { q: "¿Qué animal era el símbolo terrenal del poder en casi todas las culturas mesoamericanas?", options: ["El jaguar", "El cóndor", "El puma", "La serpiente"], a: 0 },
-            { q: "¿Qué bebida, preparada a base de cacao, era consumida por la nobleza azteca y maya?", options: ["Xocolatl", "Pulque", "Balché", "Chicha"], a: 0 },
-            { q: "¿Qué cultura andina es famosa por sus trepanaciones craneales y finos textiles funerarios?", options: ["Paracas", "Nazca", "Chavín", "Wari"], a: 0 },
-            { q: "¿Cuál era el título del gobernante máximo de una ciudad-estado mexica?", options: ["Huey Tlatoani", "Sapa Inca", "Curaca", "Ahau"], a: 0 }
+        
+        // Banco de preguntas nivel A1/A2 (30 preguntas)
+        const originalQuestionBank = [
+            { q: "¿Cómo se dice 'cama' en inglés?", options: ["Bed", "Sofa", "Chair", "Table"], a: "Bed" },
+            { q: "You sit on it in the living room. It fits 3 people.", options: ["Sofa", "Desk", "Lamp", "Mirror"], a: "Sofa" },
+            { q: "¿Dónde guardas la ropa?", options: ["Wardrobe", "Oven", "Sink", "Bookshelf"], a: "Wardrobe" },
+            { q: "A piece of furniture with shelves to hold books.", options: ["Bookshelf", "Rug", "Stool", "Drawer"], a: "Bookshelf" },
+            { q: "¿Qué mueble usas para comer?", options: ["Table", "Bed", "Armchair", "Toilet"], a: "Table" },
+            { q: "You use it to see your reflection.", options: ["Mirror", "Curtain", "Window", "Carpet"], a: "Mirror" },
+            { q: "It provides light in a dark room.", options: ["Lamp", "Desk", "Couch", "Cabinet"], a: "Lamp" },
+            { q: "¿Cómo se dice 'alfombra'?", options: ["Rug", "Curtain", "Blanket", "Towel"], a: "Rug" },
+            { q: "You work or study on this piece of furniture.", options: ["Desk", "Sofa", "Bathtub", "Fridge"], a: "Desk" },
+            { q: "A small seat without a back or arms.", options: ["Stool", "Armchair", "Bed", "Table"], a: "Stool" },
+            { q: "¿Dónde mantienes la comida fría?", options: ["Fridge", "Oven", "Microwave", "Sink"], a: "Fridge" },
+            { q: "You use it to bake a cake or roast meat.", options: ["Oven", "Toilet", "Drawer", "Lamp"], a: "Oven" },
+            { q: "¿Cómo se dice 'Sillón' (para una persona)?", options: ["Armchair", "Chair", "Sofa", "Stool"], a: "Armchair" },
+            { q: "It covers the window to block the sun.", options: ["Curtain", "Rug", "Mirror", "Painting"], a: "Curtain" },
+            { q: "You wash your hands and face here.", options: ["Sink", "Toilet", "Bathtub", "Oven"], a: "Sink" },
+            { q: "¿Dónde te acuestas a descansar en la sala?", options: ["Couch", "Desk", "Chair", "Cabinet"], a: "Couch" },
+            { q: "A small table next to your bed.", options: ["Nightstand", "Bookshelf", "Desk", "Wardrobe"], a: "Nightstand" },
+            { q: "You use this for a long, warm wash of your body.", options: ["Bathtub", "Sink", "Fridge", "Stool"], a: "Bathtub" },
+            { q: "¿Cómo se dice 'cajón'?", options: ["Drawer", "Door", "Shelf", "Box"], a: "Drawer" },
+            { q: "You watch movies and shows on it.", options: ["Television", "Mirror", "Microwave", "Oven"], a: "Television" },
+            { q: "A piece of furniture used for storing dishes or glasses.", options: ["Cabinet", "Bed", "Rug", "Armchair"], a: "Cabinet" },
+            { q: "¿Qué usas para calentar comida rápidamente?", options: ["Microwave", "Fridge", "Sink", "Bookshelf"], a: "Microwave" },
+            { q: "Basic seating for one person at a dining table.", options: ["Chair", "Sofa", "Couch", "Wardrobe"], a: "Chair" },
+            { q: "¿En qué mueble pones una lámpara pequeña junto a tu cama?", options: ["Nightstand", "Stool", "Mirror", "Oven"], a: "Nightstand" },
+            { q: "The essential fixture in a bathroom for human waste.", options: ["Toilet", "Sink", "Bathtub", "Shower"], a: "Toilet" },
+            { q: "¿Cómo se dice 'estante' o 'repisa'?", options: ["Shelf", "Drawer", "Desk", "Curtain"], a: "Shelf" },
+            { q: "A soft covering for the floor.", options: ["Carpet", "Curtain", "Mirror", "Lamp"], a: "Carpet" },
+            { q: "¿Qué palabra es sinónimo de 'Sofa'?", options: ["Couch", "Chair", "Bed", "Desk"], a: "Couch" },
+            { q: "You pull this out of a desk to find your pens.", options: ["Drawer", "Mirror", "Rug", "Sink"], a: "Drawer" },
+            { q: "It is usually in the kitchen to clean dirty dishes.", options: ["Sink", "Bathtub", "Oven", "Fridge"], a: "Sink" }
         ];
 
-        let preguntasDisponibles = [];
+        let activeQuestions = [];
+        let currentQuestion = null;
 
-        function mezclarArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+        // Utilidad: Barajar array (Fisher-Yates)
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // Controladores de UI
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function initGame() {
+            const p1 = document.getElementById('p1-name').value.trim();
+            const p2 = document.getElementById('p2-name').value.trim();
+
+            if (!p1 || !p2) {
+                alert("Por favor, introduce los nombres de ambos jugadores.");
+                return;
+            }
+
+            players[0].name = p1;
+            players[1].name = p2;
+
+            document.getElementById('label-p1').innerText = `Carril de ${p1}`;
+            document.getElementById('label-p2').innerText = `Carril de ${p2}`;
+            
+            buildTrack('track-1');
+            buildTrack('track-2');
+
+            activeQuestions = shuffle([...originalQuestionBank]);
+            
+            updateScores();
+            switchScreen('game-screen');
+            nextTurn();
+        }
+
+        function buildTrack(trackId) {
+            const trackElement = document.getElementById(trackId);
+            // Preservar el token
+            const token = trackElement.querySelector('.player-token');
+            trackElement.innerHTML = '';
+            trackElement.appendChild(token);
+
+            for (let i = 0; i <= TOTAL_STEPS; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                if (i === TOTAL_STEPS) cell.innerText = "FIN";
+                trackElement.appendChild(cell);
             }
         }
 
-        function recargarPreguntas() {
-            preguntasDisponibles = JSON.parse(JSON.stringify(bancoPreguntas));
-            mezclarArray(preguntasDisponibles);
-        }
-
-        function addPlayer() {
-            const input = document.getElementById('player-name');
-            const name = input.value.trim();
-            if (name && players.length < 6) {
-                players.push({
-                    name: name,
-                    score: 0,
-                    color: COLORES[players.length % COLORES.length]
-                });
-                
-                const li = document.createElement('li');
-                li.style.backgroundColor = players[players.length-1].color;
-                li.textContent = name;
-                document.getElementById('player-list').appendChild(li);
-                
-                input.value = '';
-                
-                if (players.length >= 2) {
-                    document.getElementById('start-btn').style.display = 'block';
-                }
-            }
-        }
-
-        document.getElementById('player-name').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') addPlayer();
-        });
-
-        function startGame() {
-            if (players.length < 2) return;
-            document.getElementById('setup-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'flex';
-            recargarPreguntas();
-            renderBoard();
-            updateTurnIndicator();
-        }
-
-        function renderBoard() {
-            const board = document.getElementById('board');
-            board.innerHTML = '';
+        function updateScores() {
+            document.getElementById('score-p1').innerText = `${players[0].name}: ${players[0].score} pts`;
+            document.getElementById('score-p2').innerText = `${players[1].name}: ${players[1].score} pts`;
             
-            const isMobile = window.innerWidth <= 600;
-            const offset = isMobile ? 80 : 120; // Espacio del nombre
-            
-            players.forEach((p, index) => {
-                const track = document.createElement('div');
-                track.className = 'track';
-                
-                const label = document.createElement('div');
-                label.className = 'track-label';
-                label.textContent = p.name;
-                
-                const finish = document.createElement('div');
-                finish.className = 'finish-line';
-                finish.textContent = PUNTOS_PARA_GANAR;
-                
-                const avatar = document.createElement('div');
-                avatar.className = 'avatar';
-                avatar.style.backgroundColor = p.color;
-                avatar.textContent = p.score;
-                avatar.id = 'avatar-' + index;
-                
-                // Calcular posición inicial
-                avatar.style.left = `calc(${offset}px + calc(calc(100% - ${offset + 40}px) * ${p.score / PUNTOS_PARA_GANAR}))`;
-                
-                track.appendChild(label);
-                track.appendChild(finish);
-                track.appendChild(avatar);
-                board.appendChild(track);
-            });
-        }
-
-        function updateTurnIndicator() {
-            const indicator = document.getElementById('turn-indicator');
-            const currentPlayer = players[currentPlayerIndex];
-            indicator.innerHTML = `Turno de: <span style="color:${currentPlayer.color}">${currentPlayer.name}</span>`;
-        }
-
-        function drawQuestion() {
-            if (preguntasDisponibles.length === 0) {
-                recargarPreguntas();
-            }
-
-            const rawQ = preguntasDisponibles.pop();
-            
-            // Barajar opciones y registrar dónde queda la correcta
-            const opcionesBarajadas = rawQ.options.map((opt, i) => ({ text: opt, isCorrect: i === rawQ.a }));
-            mezclarArray(opcionesBarajadas);
-            
-            currentQuestion = {
-                q: rawQ.q,
-                options: opcionesBarajadas
+            // Actualizar posiciones visuales
+            const moveToken = (playerIndex, trackId, tokenId) => {
+                const trackWidth = document.getElementById(trackId).offsetWidth;
+                const cellWidth = trackWidth / (TOTAL_STEPS + 1);
+                // Calcular la posición izquierda en píxeles. Se ajusta + 25% del ancho de celda para centrar.
+                const pos = players[playerIndex].position * cellWidth + (cellWidth * 0.1); 
+                document.getElementById(tokenId).style.left = `${pos}px`;
             };
 
-            document.getElementById('question-text').textContent = currentQuestion.q;
+            moveToken(0, 'track-1', 'token-1');
+            moveToken(1, 'track-2', 'token-2');
+        }
+
+        function nextTurn() {
+            const turnDisplay = document.getElementById('turn-display');
+            turnDisplay.innerText = `Turno de: ${players[currentPlayerIndex].name}`;
+            turnDisplay.style.color = currentPlayerIndex === 0 ? 'var(--player1)' : 'var(--player2)';
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            // Recargar banco si se agota
+            if (activeQuestions.length === 0) {
+                activeQuestions = shuffle([...originalQuestionBank]);
+            }
+
+            currentQuestion = activeQuestions.pop();
+            document.getElementById('question-text').innerText = currentQuestion.q;
+
             const optionsContainer = document.getElementById('options-container');
             optionsContainer.innerHTML = '';
 
-            currentQuestion.options.forEach((opt) => {
+            const shuffledOptions = shuffle([...currentQuestion.options]);
+
+            shuffledOptions.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
-                btn.textContent = opt.text;
-                btn.onclick = () => checkAnswer(opt.isCorrect, btn);
+                btn.innerText = opt;
+                btn.onclick = () => handleAnswer(opt);
                 optionsContainer.appendChild(btn);
             });
-
-            document.getElementById('question-modal').style.display = 'flex';
         }
 
-        function checkAnswer(isCorrect, btn) {
-            const options = document.querySelectorAll('.option-btn');
-            options.forEach(b => b.disabled = true); // Bloquear botones
-            
-            if (isCorrect) {
-                btn.style.backgroundColor = '#27ae60'; // Verde
-                players[currentPlayerIndex].score += PUNTOS_POR_ACIERTO;
-                if (players[currentPlayerIndex].score > PUNTOS_PARA_GANAR) {
-                    players[currentPlayerIndex].score = PUNTOS_PARA_GANAR;
-                }
+        function handleAnswer(selectedOption) {
+            // Deshabilitar botones para evitar clics múltiples
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(b => b.disabled = true);
+
+            if (selectedOption === currentQuestion.a) {
+                players[currentPlayerIndex].score += POINTS_PER_QUESTION;
+                players[currentPlayerIndex].position += 1;
             } else {
-                btn.style.backgroundColor = '#c0392b'; // Rojo
-                // Resaltar la correcta
-                options.forEach((b, idx) => {
-                    if (currentQuestion.options[idx].isCorrect) {
-                        b.style.backgroundColor = '#27ae60';
-                    }
-                });
+                alert(`Incorrecto. La respuesta era: ${currentQuestion.a}`);
             }
 
-            updateBoardVisuals();
+            updateScores();
 
-            setTimeout(() => {
-                document.getElementById('question-modal').style.display = 'none';
-                
-                if (players[currentPlayerIndex].score >= PUNTOS_PARA_GANAR) {
-                    showEndScreen();
-                } else {
-                    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-                    updateTurnIndicator();
-                }
-            }, 1500);
-        }
-
-        function updateBoardVisuals() {
-            const isMobile = window.innerWidth <= 600;
-            const offset = isMobile ? 80 : 120;
-            
-            const p = players[currentPlayerIndex];
-            const avatar = document.getElementById('avatar-' + currentPlayerIndex);
-            
-            avatar.textContent = p.score;
-            avatar.style.left = `calc(${offset}px + calc(calc(100% - ${offset + 40}px) * ${p.score / PUNTOS_PARA_GANAR}))`;
-        }
-
-        function showEndScreen() {
-            document.getElementById('game-screen').style.display = 'none';
-            document.getElementById('end-screen').style.display = 'block';
-            document.getElementById('winner-text').textContent = `¡Felicidades, ${players[currentPlayerIndex].name}! Has dominado la historia prehispánica.`;
-        }
-
-        // Manejar redimensionamiento para actualizar posiciones
-        window.addEventListener('resize', () => {
-            if (document.getElementById('game-screen').style.display === 'flex') {
-                players.forEach((p, index) => {
-                    const isMobile = window.innerWidth <= 600;
-                    const offset = isMobile ? 80 : 120;
-                    const avatar = document.getElementById('avatar-' + index);
-                    avatar.style.left = `calc(${offset}px + calc(calc(100% - ${offset + 40}px) * ${p.score / PUNTOS_PARA_GANAR}))`;
-                });
+            // Evaluar condición de victoria
+            if (players[currentPlayerIndex].score >= POINTS_TO_WIN) {
+                setTimeout(() => endGame(players[currentPlayerIndex].name), 500);
+            } else {
+                // Cambiar turno
+                currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
+                setTimeout(nextTurn, 300); // Pequeña pausa antes del próximo turno
             }
-        });
+        }
+
+        function endGame(winnerName) {
+            document.getElementById('winner-announcement').innerText = `¡Felicidades, ${winnerName}!`;
+            switchScreen('end-screen');
+        }
     </script>
 </body>
 </html>
